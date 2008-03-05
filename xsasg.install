@@ -1,0 +1,59 @@
+<?php
+/* $Id$ */
+
+/**
+ * Implementation of hook_install().
+ */
+function xsasg_install() {
+
+  if (!module_exists('imagecache')) {
+    drupal_set_message('Could not install eXtreme Small and Simple Gallery, please install all dependencies and try again.', 'error');
+    db_query("DELETE FROM {system} WHERE name='xsasg'");
+    return false;
+  }
+
+  $presets = xsasg_get_presets();
+  foreach($presets as $key => $preset) {
+    $preset_next_id = db_next_id('{imagecache_preset}_presetid');
+    db_query('INSERT INTO {imagecache_preset} (presetid, presetname) VALUES (%d, \'%s\')', $preset_next_id, $preset['name']);
+
+    $action_next_id = db_next_id('{imagecache_action}_actionid');
+    db_query('INSERT INTO {imagecache_action} (actionid, presetid, weight, data) VALUES (%d, %d, %d, \'%s\')', $action_next_id, $preset_next_id, $preset['weight'], $preset['data']);
+  }
+  // Reset presets cache.
+  _imagecache_get_presets(TRUE);
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function xsasg_uninstall() {
+  $presets = xsasg_get_presets();
+  foreach($presets as $key => $preset) {
+    $preset_id = db_result(db_query("SELECT "));
+  }
+}
+
+/**
+ * Define default imagecache presets
+ */
+function xsasg_get_presets() {
+  $presets = array(
+    1 => array(
+      'name' => 'xsasg-node-thumbnail',
+      'weight' => 0,
+      'data' => 'a:4:{s:8:"function";s:5:"scale";s:3:"fit";s:6:"inside";s:5:"width";s:3:"160";s:6:"height";s:3:"120";}',
+    ),
+    2 => array(
+      'name' => 'xsasg-node-preview',
+      'weight' => 0,
+      'data' => 'a:4:{s:8:"function";s:5:"scale";s:3:"fit";s:6:"inside";s:5:"width";s:3:"320";s:6:"height";s:3:"240";}',
+    ),
+    3 => array(
+      'name' => 'xsasg-node-full',
+      'weight' => 0,
+      'data' => 'a:4:{s:8:"function";s:5:"scale";s:3:"fit";s:6:"inside";s:5:"width";s:3:"640";s:6:"height";s:3:"480";}',
+    ),
+  );
+  return $presets;
+}

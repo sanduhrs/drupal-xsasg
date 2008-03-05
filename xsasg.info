@@ -1,0 +1,5 @@
+; $Id$
+name = eXtreme Small And Simple Gallery
+description = A small and simple gallery with upload, imagecache and thickbox
+package = image
+dependencies = upload imagecache thickbox

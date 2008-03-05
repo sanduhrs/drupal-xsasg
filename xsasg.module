@@ -1,0 +1,77 @@
+<?php
+/* $Id$ */
+
+/**
+ * eXtreme Small and Sweet Gallery
+ *
+ * @author Stefan Auditor <stefan.auditor@erdfisch.de>
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function xsasg_menu($may_cache) {
+  $items = array();
+  if ($may_cache) {
+    $items[] = array(
+      'path' => 'admin/settings/xsasg',
+      'title' => t('eXtreme Small and Simple Gallery'),
+      'description' => t('Little image gallery with upload, imagecache and thickbox.'),
+      'callback' => 'drupal_get_form',
+      'callback arguments' => 'xsasg_admin_settings',
+      'access' => user_access('administer site configuration'),
+      'type' => MENU_NORMAL_ITEM,
+    );
+  }
+  return $items;
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function xsasg_nodeapi(&$node, $op, $teaser) {
+  $mime_types = array('image/gif','image/jpeg','image/png',);
+  $types = variable_get('xsasg_node_types', '');
+
+  if (is_array($types) AND in_array($node->type, $types)) {
+    switch ($op) {
+      case 'view':
+        $namespace = $teaser ? 'xsasg-node-thumbnail' : 'xsasg-node-preview';
+        rsort($node->files);
+        $node->content['xsasg'] = array(
+          '#prefix' => '<div id="xsasg-gallery-'. $node->nid .'" class="xsasg-gallery">',
+          '#suffix' => '</div>',
+          '#weight' => 1,
+        );
+        foreach ($node->files as $file) {
+          if (in_array($file->filemime, $mime_types)) {
+            $node->content['xsasg'][] = array(
+              '#value' => '<a class="thickbox" rel="xsasg-gallery-item" title="' . $node->title .': '. $file->filename .'" href="'. file_create_url(file_directory_path() .'/imagecache/xsasg-node-full/'. $file->filepath) .'">'. theme('imagecache', $namespace, $file->filepath, $alt, $title, array('class' => 'xsasg-gallery-item xsasg-gallery-item-'. $file->fid)) .'</a>',
+              '#weight' => 0,
+            );
+          }
+        }
+        break;
+    }
+  }
+}
+
+/**
+ * Administration settings
+ */
+function xsasg_admin_settings() {
+//   dprint_r(_imagecache_get_presets());
+  $form['xsasg'] = array(
+    '#value' => 'eXtreme Small and Simple Gallery extends any node type you choose to be a gallery.',
+  );
+  $form['xsasg_node_types'] = array(
+    '#type' => 'select',
+    '#options' => node_get_types('names'),
+    '#default_value' => variable_get('xsasg_node_types', ''),
+    '#multiple' => TRUE,
+    '#description' => t('Choose the node type(s) that should automatically display image attachments as a gallery.'),
+  );
+  //TODO: allow one imagecache setting per node type
+
+  return system_settings_form($form);
+}
