@@ -36,6 +36,7 @@ function xsasg_nodeapi(&$node, $op, $teaser) {
   if (is_array($types) AND in_array($node->type, $types)) {
     switch ($op) {
       case 'view':
+        drupal_add_css(drupal_get_path('module', 'xsasg') .'/xsasg.css');
         $namespace = $teaser ? 'xsasg-node-thumbnail' : 'xsasg-node-preview';
         rsort($node->files);
         $node->content['xsasg'] = array(
