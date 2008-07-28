@@ -38,7 +38,6 @@ function xsasg_nodeapi(&$node, $op, $teaser) {
       case 'view':
         drupal_add_css(drupal_get_path('module', 'xsasg') .'/xsasg.css');
         $namespace = $teaser ? 'xsasg-node-thumbnail' : 'xsasg-node-preview';
-        rsort($node->files);
         $node->content['xsasg'] = array(
           '#prefix' => '<div id="xsasg-gallery-'. $node->nid .'" class="xsasg-gallery">',
           '#suffix' => '</div>',
@@ -61,7 +60,6 @@ function xsasg_nodeapi(&$node, $op, $teaser) {
  * Administration settings
  */
 function xsasg_admin_settings() {
-//   dprint_r(_imagecache_get_presets());
   $form['xsasg'] = array(
     '#value' => 'eXtreme Small and Simple Gallery extends any node type you choose to be a gallery.',
   );
